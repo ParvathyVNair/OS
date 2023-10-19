@@ -1,0 +1,57 @@
+#include <stdio.h>
+
+struct memory_block {
+    int start_address;
+    int end_address;
+    int size;
+    int allocated; // 0 means not allocated, 1 means allocated
+};
+
+int main() {
+    int num_blocks, num_processes;
+
+    // Prompt user to enter the number of memory blocks
+    printf("Enter the number of memory blocks: ");
+    scanf("%d", &num_blocks);
+
+    struct memory_block blocks[num_blocks];
+
+    // Ask user to enter the size of each memory block
+    for (int i = 0; i < num_blocks; i++) {
+        printf("Enter the size of memory block %d: ", i + 1);
+        scanf("%d", &blocks[i].size);
+        blocks[i].start_address = i == 0 ? 0 : blocks[i - 1].end_address + 1; // calculate start and end addresses
+        blocks[i].end_address = blocks[i].start_address + blocks[i].size - 1;
+        blocks[i].allocated = 0; // initialize the memory block as not allocated
+    }
+
+    // Prompt user to enter the number of processes
+    printf("Enter the number of processes: ");
+    scanf("%d", &num_processes);
+
+    // Ask user to enter the size of each process and allocate memory using the best fit algorithm
+    printf("| Process No. | Process Size  | Block No. | Block Size | Fragmentation |\n");
+    printf("|-------------|---------------|-----------|------------|--------------|\n");
+    for (int i = 1; i <= num_processes; i++) {
+        int process_size, block_allocated = -1;
+        int min_frag = -1;
+        printf("Enter the size of process %d: ", i);
+        scanf("%d", &process_size);
+        for (int j = 0; j < num_blocks; j++) {
+            if (blocks[j].allocated == 0 && blocks[j].size >= process_size) {
+                if (min_frag == -1 || blocks[j].size - process_size < min_frag) {
+                    min_frag = blocks[j].size - process_size;
+                    block_allocated = j;
+                }
+            }
+        }
+        if (block_allocated != -1) {
+            blocks[block_allocated].allocated = 1;
+            printf("| %d           | %-14d | %d         | %-10d | %-13d |\n", i, process_size, block_allocated + 1, blocks[block_allocated].size, blocks[block_allocated].size - process_size);
+        } else {
+            printf("| %d           | %-14d | %-9s | %-10s | %-13s |\n", i, process_size, "Not found", "-", "-");
+        }
+    }
+
+    return 0;
+}
