@@ -1,0 +1,68 @@
+#include <stdio.h>  
+
+int main() {  
+    // Read number of pages and incoming stream from user
+    printf("Enter the number of pages: ");
+    int pages, m, n, s, frames;
+    scanf("%d", &pages);
+    int incomingStream[pages];
+    printf("Enter the incoming streams\n");
+    for(int i=0; i<pages; i++)
+        scanf("%d", &incomingStream[i]);  
+    
+    // Read number of frames from user
+    printf("Enter the number of frames: ");
+    scanf("%d", &frames);
+    
+    // Print the header for the frame table
+    printf("Inc\t");
+    for(int i=1; i<=frames; i++)
+        printf("Frame %d\t\t", i);  
+    
+    // Initialize variables and arrays
+    int pageFaults = 0;
+    int temp[frames];  // Array to hold the state of frames
+    for(m=0; m<frames; m++)
+        temp[m] = -1; // Initialize frames with empty slots (-1)
+
+    // Process each incoming page in the stream
+    for(m=0; m<pages; m++)  
+    {  
+        s = 0; // Counter to track if page is already in frame
+        
+        // Check if incoming page is already in frames
+        for(n=0; n<frames; n++)  
+        {  
+            if(incomingStream[m] == temp[n])  
+            {  
+                s++;  // Increment counter if page is found in frame
+                pageFaults--; // Decrement page fault count to offset the increment later
+            }  
+        }  
+        
+        pageFaults++; // Increment the page fault count
+        
+        // Add incoming page to an empty frame if there are any available
+        if((pageFaults <= frames) && (s == 0))  
+            temp[m] = incomingStream[m]; // If there are empty frames, add the incoming page
+        // If all frames are full and incoming page is not in frames, replace the least recently used page
+        else if(s == 0)  
+            temp[(pageFaults-1) % frames] = incomingStream[m]; // Replace pages in round-robin manner
+        
+        printf("\n");  
+        printf("%d\t\t", incomingStream[m]);  
+        
+        // Print the state of frames after processing the incoming page
+        for(n = 0; n < frames; n++)  
+        {  
+            if(temp[n] != -1)  
+                printf("%d\t\t", temp[n]);  
+            else  
+                printf("-\t\t"); // Use "-" to represent empty frame
+        }  
+    }  
+    
+    // Print the total number of page faults
+    printf("\nTotal Page Faults: %d\n", pageFaults);  
+    return 0;  
+}
